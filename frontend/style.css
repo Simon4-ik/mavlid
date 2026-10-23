@@ -1,0 +1,693 @@
+/* ==========================================================================
+   Mawlid an-Nabiy (Мавлид ан-Набий) - Telegram Mini App eReader Stylesheet
+   Modern, High-Performance, Mobile-First Design System
+   ========================================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Outfit:wght@300;400;500;600;700&display=swap');
+
+:root {
+  /* Default: Dark Obsidian & Sacred Gold */
+  --bg-primary: #0b0f17;
+  --bg-secondary: #131a26;
+  --bg-elevated: rgba(22, 31, 46, 0.85);
+  --bg-card: #182232;
+  
+  --text-primary: #f1f5f9;
+  --text-secondary: #94a3b8;
+  --text-muted: #64748b;
+  
+  --gold-primary: #d4af37;
+  --gold-glow: rgba(212, 175, 55, 0.25);
+  --gold-gradient: linear-gradient(135deg, #f3e098 0%, #d4af37 50%, #aa820a 100%);
+  --accent-emerald: #10b981;
+  
+  --border-subtle: rgba(255, 255, 255, 0.08);
+  --border-gold: rgba(212, 175, 55, 0.3);
+  
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.25);
+  --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.35);
+  --shadow-gold: 0 0 20px rgba(212, 175, 55, 0.2);
+  
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  
+  --header-height: 58px;
+  --footer-height: 72px;
+  --transition-fast: 0.18s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-smooth: 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Sepia Mode (Warm Antique Parchment) */
+[data-theme="sepia"] {
+  --bg-primary: #f4ecd8;
+  --bg-secondary: #e8deca;
+  --bg-elevated: rgba(232, 222, 202, 0.92);
+  --bg-card: #efe5d1;
+  --text-primary: #3c2f1f;
+  --text-secondary: #6e5d48;
+  --text-muted: #9c8973;
+  --gold-primary: #a3721e;
+  --gold-glow: rgba(163, 114, 30, 0.15);
+  --gold-gradient: linear-gradient(135deg, #c7973d 0%, #a3721e 100%);
+  --border-subtle: rgba(60, 47, 31, 0.1);
+  --border-gold: rgba(163, 114, 30, 0.35);
+  --shadow-sm: 0 2px 8px rgba(60, 47, 31, 0.08);
+  --shadow-md: 0 8px 20px rgba(60, 47, 31, 0.12);
+}
+
+/* Light Mode (Crisp Daylight Paper) */
+[data-theme="light"] {
+  --bg-primary: #f8fafc;
+  --bg-secondary: #f1f5f9;
+  --bg-elevated: rgba(255, 255, 255, 0.92);
+  --bg-card: #ffffff;
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
+  --text-muted: #94a3b8;
+  --gold-primary: #b4811a;
+  --gold-glow: rgba(180, 129, 26, 0.15);
+  --gold-gradient: linear-gradient(135deg, #e5b244 0%, #b4811a 100%);
+  --border-subtle: rgba(15, 23, 42, 0.08);
+  --border-gold: rgba(180, 129, 26, 0.35);
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.06);
+  --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.09);
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+}
+
+body, html {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: 'Outfit', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-size: 15px;
+  touch-action: pan-y;
+  transition: background-color var(--transition-smooth), color var(--transition-smooth);
+}
+
+/* Reader App Layout */
+.app-container {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  position: relative;
+  overflow: hidden;
+}
+
+/* ==========================================================================
+   Header Toolbar (Glassmorphism)
+   ========================================================================== */
+.app-header {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 40;
+  padding-top: var(--safe-top);
+  background: var(--bg-elevated);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--border-subtle);
+  transform: translateY(0);
+  transition: transform var(--transition-smooth), opacity var(--transition-smooth);
+}
+
+.app-header.hidden {
+  transform: translateY(-100%);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.header-inner {
+  height: var(--header-height);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 14px;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.book-title-wrapper {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  cursor: pointer;
+}
+
+.book-badge {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  color: var(--gold-primary);
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.book-title {
+  font-family: 'Amiri', serif;
+  font-size: 19px;
+  font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  letter-spacing: 0.2px;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.icon-btn {
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  border: 1px solid var(--border-subtle);
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  outline: none;
+}
+
+.icon-btn:hover {
+  background: rgba(255, 255, 255, 0.09);
+  border-color: var(--border-gold);
+}
+
+.icon-btn:active {
+  transform: scale(0.92);
+}
+
+.icon-btn.active {
+  color: var(--gold-primary);
+  background: var(--gold-glow);
+  border-color: var(--gold-primary);
+}
+
+/* ==========================================================================
+   Main Reader Viewport
+   ========================================================================== */
+.reader-viewport {
+  flex: 1;
+  width: 100%;
+  height: 100%;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  touch-action: none;
+}
+
+/* Tap Zones for Page Turning */
+.tap-zone {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  z-index: 20;
+}
+
+.tap-zone.left {
+  left: 0;
+  width: 25%;
+}
+
+.tap-zone.center {
+  left: 25%;
+  right: 25%;
+  z-index: 15;
+}
+
+.tap-zone.right {
+  right: 0;
+  width: 25%;
+}
+
+/* Page Frame & Image */
+.canvas-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  max-width: 96vw;
+  max-height: calc(100vh - var(--header-height) - var(--footer-height) - var(--safe-top) - var(--safe-bottom) - 24px);
+  transition: transform 0.24s cubic-bezier(0.2, 0, 0, 1);
+  box-shadow: var(--shadow-md);
+  border-radius: 6px;
+  background-color: #ffffff;
+  overflow: hidden;
+}
+
+#page-image {
+  display: block;
+  max-width: 100%;
+  max-height: calc(100vh - var(--header-height) - var(--footer-height) - var(--safe-top) - var(--safe-bottom) - 24px);
+  object-fit: contain;
+  border-radius: 6px;
+  transform-origin: center center;
+  transition: transform 0.2s cubic-bezier(0.2, 0, 0, 1);
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+[data-theme="sepia"] #page-image {
+  filter: sepia(0.25) contrast(1.05) brightness(0.97);
+}
+
+[data-theme="dark"] #page-image {
+  filter: brightness(0.93) contrast(1.03);
+}
+
+/* Loading Skeleton & Error States */
+.loading-overlay {
+  position: absolute;
+  inset: 0;
+  background: var(--bg-primary);
+  z-index: 50;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  transition: opacity 0.3s ease;
+}
+
+.loading-overlay.hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.spinner {
+  width: 48px;
+  height: 48px;
+  border: 3px solid var(--border-subtle);
+  border-top-color: var(--gold-primary);
+  border-radius: 50%;
+  animation: spin 0.9s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.loading-text {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+/* Page Indicator Floating Pill */
+.page-pill {
+  position: absolute;
+  bottom: calc(var(--footer-height) + var(--safe-bottom) + 12px);
+  background: var(--bg-elevated);
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--border-subtle);
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
+  box-shadow: var(--shadow-sm);
+  z-index: 25;
+  transition: opacity var(--transition-smooth), transform var(--transition-smooth);
+}
+
+.page-pill.hidden {
+  opacity: 0;
+  transform: translateY(10px);
+  pointer-events: none;
+}
+
+/* ==========================================================================
+   Footer Toolbar (Glassmorphism & Scrubber)
+   ========================================================================== */
+.app-footer {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 40;
+  padding-bottom: var(--safe-bottom);
+  background: var(--bg-elevated);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-top: 1px solid var(--border-subtle);
+  transform: translateY(0);
+  transition: transform var(--transition-smooth), opacity var(--transition-smooth);
+}
+
+.app-footer.hidden {
+  transform: translateY(100%);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.footer-inner {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 10px 16px 12px;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+/* Scrubber / Slider Row */
+.scrubber-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+}
+
+.page-count-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-muted);
+  min-width: 44px;
+  text-align: center;
+}
+
+.slider-container {
+  flex: 1;
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.page-slider {
+  -webkit-appearance: none;
+  width: 100%;
+  height: 6px;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.12);
+  outline: none;
+  cursor: pointer;
+}
+
+[data-theme="sepia"] .page-slider,
+[data-theme="light"] .page-slider {
+  background: rgba(0, 0, 0, 0.12);
+}
+
+.page-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--gold-gradient);
+  cursor: pointer;
+  box-shadow: 0 0 10px rgba(212, 175, 55, 0.5);
+  border: 2px solid #ffffff;
+  transition: transform 0.1s ease;
+}
+
+.page-slider::-webkit-slider-thumb:active {
+  transform: scale(1.3);
+}
+
+/* Nav Buttons Row */
+.controls-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.nav-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border-radius: 12px;
+  border: 1px solid var(--border-subtle);
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text-primary);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.nav-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.nav-btn:not(:disabled):hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: var(--border-gold);
+}
+
+.nav-btn:not(:disabled):active {
+  transform: scale(0.96);
+}
+
+.page-quick-jump {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--gold-primary);
+  padding: 6px 14px;
+  border-radius: 10px;
+  background: var(--gold-glow);
+  cursor: pointer;
+  transition: transform 0.1s ease;
+}
+
+.page-quick-jump:active {
+  transform: scale(0.95);
+}
+
+/* ==========================================================================
+   Modals & Drawers (TOC, Bookmarks, Themes)
+   ========================================================================== */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  z-index: 100;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--transition-smooth);
+}
+
+.modal-backdrop.open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.modal-sheet {
+  width: 100%;
+  max-width: 520px;
+  max-height: 80vh;
+  background: var(--bg-card);
+  border-top-left-radius: 24px;
+  border-top-right-radius: 24px;
+  border: 1px solid var(--border-subtle);
+  border-bottom: none;
+  box-shadow: var(--shadow-md);
+  display: flex;
+  flex-direction: column;
+  transform: translateY(100%);
+  transition: transform var(--transition-smooth);
+  padding-bottom: var(--safe-bottom);
+}
+
+.modal-backdrop.open .modal-sheet {
+  transform: translateY(0);
+}
+
+.modal-header {
+  padding: 16px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.modal-title {
+  font-size: 17px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.modal-close-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 8px;
+}
+
+.modal-body {
+  padding: 18px 20px;
+  overflow-y: auto;
+  flex: 1;
+}
+
+/* Page Grid for Jump to Page */
+.page-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+}
+
+.page-grid-item {
+  aspect-ratio: 1;
+  border-radius: 12px;
+  border: 1px solid var(--border-subtle);
+  background: rgba(255, 255, 255, 0.03);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.page-grid-item:hover {
+  border-color: var(--border-gold);
+  background: rgba(255, 255, 255, 0.07);
+}
+
+.page-grid-item.active {
+  background: var(--gold-gradient);
+  color: #0b0f17;
+  border-color: var(--gold-primary);
+  box-shadow: var(--shadow-gold);
+}
+
+.page-grid-item .label {
+  font-size: 10px;
+  font-weight: 500;
+  opacity: 0.75;
+}
+
+/* Bookmarks List */
+.bookmarks-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.bookmark-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--border-subtle);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.bookmark-item:hover {
+  border-color: var(--border-gold);
+  background: rgba(255, 255, 255, 0.07);
+}
+
+.bookmark-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.bookmark-page-badge {
+  background: var(--gold-glow);
+  color: var(--gold-primary);
+  font-size: 13px;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 8px;
+}
+
+.bookmark-delete-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 6px;
+  transition: color 0.15s ease;
+}
+
+.bookmark-delete-btn:hover {
+  color: #ef4444;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 40px 10px;
+  color: var(--text-muted);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Theme Selector Chips */
+.theme-options {
+  display: flex;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.theme-chip {
+  flex: 1;
+  padding: 12px;
+  border-radius: 12px;
+  border: 2px solid var(--border-subtle);
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--text-primary);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 13px;
+  transition: all var(--transition-fast);
+}
+
+.theme-chip.active {
+  border-color: var(--gold-primary);
+  background: var(--gold-glow);
+}
+
+/* Pulse animation on page turn */
+.page-flip-anim {
+  animation: pageFlip 0.22s ease-out;
+}
+
+@keyframes pageFlip {
+  0% { transform: scale(0.97); opacity: 0.8; }
+  100% { transform: scale(1); opacity: 1; }
+}
