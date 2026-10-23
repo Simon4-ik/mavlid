@@ -31,6 +31,7 @@
     currentPage: 1,
     totalPages: CONFIG.totalPages,
     uiVisible: true,
+    isFullscreen: false,
     theme: 'dark',
     bookmarks: [],
     touchStartX: 0,
@@ -277,11 +278,107 @@
     renderPage(target);
   }
 
-  function toggleControls() {
-    state.uiVisible = !state.uiVisible;
+  function toggleControls(forceState) {
+    state.uiVisible = typeof forceState === 'boolean' ? forceState : !state.uiVisible;
     dom.header.classList.toggle('hidden', !state.uiVisible);
     dom.footer.classList.toggle('hidden', !state.uiVisible);
     dom.pagePill.classList.toggle('hidden', state.uiVisible);
+  }
+
+  // --- Fullscreen Handling (Telegram Mini App + Browser) ---
+  const ICONS = {
+    fullscreenEnter: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path></svg>`,
+    fullscreenExit: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3m0 18v-3a2 2 0 0 1 2-2h3M3 16h3a2 2 0 0 1 2 2v3"></path></svg>`
+  };
+
+  function updateFullscreenUI(isFullscreen) {
+    state.isFullscreen = isFullscreen;
+    dom.app.classList.toggle('fullscreen-mode', isFullscreen);
+    if (dom.btnFullscreen) {
+      dom.btnFullscreen.innerHTML = isFullscreen ? ICONS.fullscreenExit : ICONS.fullscreenEnter;
+      dom.btnFullscreen.classList.toggle('active', isFullscreen);
+      dom.btnFullscreen.title = isFullscreen ? "Тўлиқ экрандан чиқиш" : "Тўлиқ экран";
+      dom.btnFullscreen.setAttribute('aria-label', isFullscreen ? "Тўлиқ экрандан чиқиш" : "Тўлиқ экран");
+    }
+  }
+
+  function isSystemFullscreen() {
+    if (tg && typeof tg.isFullscreen === 'boolean') {
+      return tg.isFullscreen;
+    }
+    return !!(
+      document.fullscreenElement ||
+      document.webkitFullscreenElement ||
+      document.mozFullScreenElement ||
+      document.msFullscreenElement
+    );
+  }
+
+  async function toggleFullscreen() {
+    triggerHaptic('medium');
+    const currentlyFs = state.isFullscreen || isSystemFullscreen();
+
+    if (!currentlyFs) {
+      // 1. Enter Fullscreen Mode
+      updateFullscreenUI(true);
+      toggleControls(false); // Hide toolbars for immersive reading
+
+      // Telegram Mini App API (Bot API 8.0+)
+      if (tg) {
+        if (typeof tg.requestFullscreen === 'function') {
+          try { tg.requestFullscreen(); } catch (e) {}
+        }
+        if (typeof tg.expand === 'function') {
+          try { tg.expand(); } catch (e) {}
+        }
+      }
+
+      // Cross-Browser HTML5 Fullscreen API (safely guarded)
+      const el = document.documentElement;
+      try {
+        if (typeof el.requestFullscreen === 'function') {
+          await el.requestFullscreen().catch(() => {});
+        } else if (typeof el.webkitRequestFullscreen === 'function') {
+          el.webkitRequestFullscreen();
+        } else if (typeof el.mozRequestFullScreen === 'function') {
+          el.mozRequestFullScreen();
+        } else if (typeof el.msRequestFullscreen === 'function') {
+          el.msRequestFullscreen();
+        }
+      } catch (e) {
+        // Fallback immersive mode is already active
+      }
+    } else {
+      // 2. Exit Fullscreen Mode
+      updateFullscreenUI(false);
+      toggleControls(true); // Restore toolbars
+
+      // Telegram Mini App API
+      if (tg && typeof tg.exitFullscreen === 'function') {
+        try { tg.exitFullscreen(); } catch (e) {}
+      }
+
+      // Cross-Browser HTML5 Fullscreen API
+      try {
+        if (typeof document.exitFullscreen === 'function') {
+          await document.exitFullscreen().catch(() => {});
+        } else if (typeof document.webkitExitFullscreen === 'function') {
+          document.webkitExitFullscreen();
+        } else if (typeof document.mozCancelFullScreen === 'function') {
+          document.mozCancelFullScreen();
+        } else if (typeof document.msExitFullscreen === 'function') {
+          document.msExitFullscreen();
+        }
+      } catch (e) {}
+    }
+  }
+
+  function syncFullscreenState() {
+    const isFs = isSystemFullscreen();
+    if (!isFs && state.isFullscreen) {
+      updateFullscreenUI(false);
+      toggleControls(true);
+    }
   }
 
   // --- Bookmarks Logic ---
@@ -502,13 +599,32 @@
     dom.btnOpenToc.addEventListener('click', () => openModal(dom.modalJump));
     dom.btnThemeModal.addEventListener('click', () => openModal(dom.modalThemes));
 
-    dom.btnFullscreen.addEventListener('click', () => {
-      if (!document.fullscreenElement) {
-        document.documentElement.requestFullscreen().catch(() => {});
-      } else {
-        document.exitFullscreen().catch(() => {});
-      }
+    dom.btnFullscreen.addEventListener('click', (e) => {
+      e.stopPropagation();
+      toggleFullscreen();
     });
+
+    if (dom.pagePill) {
+      dom.pagePill.addEventListener('click', () => {
+        toggleControls(true);
+      });
+    }
+
+    document.addEventListener('fullscreenchange', syncFullscreenState);
+    document.addEventListener('webkitfullscreenchange', syncFullscreenState);
+
+    if (tg?.onEvent) {
+      try {
+        tg.onEvent('fullscreenChanged', () => {
+          if (typeof tg.isFullscreen === 'boolean') {
+            updateFullscreenUI(tg.isFullscreen);
+            if (!tg.isFullscreen) {
+              toggleControls(true);
+            }
+          }
+        });
+      } catch (e) {}
+    }
 
     dom.pageImage.addEventListener('load', () => {
       dom.loadingOverlay.classList.add('hidden');
