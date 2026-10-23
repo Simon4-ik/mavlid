@@ -40,9 +40,19 @@ def _get_pdf_path():
             return os.path.join(BASE_DIR, f)
     return os.path.join(BASE_DIR, "mavlid.pdf")
 
+def _normalize_webapp_url(url: str) -> str:
+    url = (url or "").strip()
+    if not url:
+        return "http://localhost:8080"
+    if not (url.startswith("http://") or url.startswith("https://")):
+        url = f"https://{url}"
+    if url.startswith("http://") and not ("localhost" in url or "127.0.0.1" in url):
+        url = "https://" + url[len("http://"):]
+    return url.rstrip("/")
+
 PDF_PATH = _get_pdf_path()
 BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN", "")
-WEBAPP_URL = os.getenv("WEBAPP_URL", "http://localhost:8080")
+WEBAPP_URL = _normalize_webapp_url(os.getenv("WEBAPP_URL", "http://localhost:8080"))
 PORT = int(os.getenv("PORT", "8080"))
 HOST = os.getenv("HOST", "0.0.0.0")
 

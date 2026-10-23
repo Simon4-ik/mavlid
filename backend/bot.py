@@ -10,7 +10,12 @@ logger = logging.getLogger("tg_bot")
 class TelegramMiniAppBot:
     def __init__(self, token: str, webapp_url: str, pdf_path: str = ""):
         self.token = token
-        self.webapp_url = webapp_url
+        url = (webapp_url or "").strip()
+        if url and not (url.startswith("http://") or url.startswith("https://")):
+            url = f"https://{url}"
+        if url.startswith("http://") and not ("localhost" in url or "127.0.0.1" in url):
+            url = "https://" + url[len("http://"):]
+        self.webapp_url = url.rstrip("/")
         self.pdf_path = pdf_path
         self.api_url = f"https://api.telegram.org/bot{token}"
         self.bot_info = None

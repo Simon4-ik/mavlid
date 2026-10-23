@@ -79,7 +79,9 @@ def main():
 
     host = os.getenv("HOST", "0.0.0.0")
     port = int(os.getenv("PORT", "8080"))
-    webapp_url = os.getenv("WEBAPP_URL", f"http://localhost:{port}")
+    webapp_url = os.getenv("WEBAPP_URL", f"http://localhost:{port}").strip()
+    if webapp_url and not (webapp_url.startswith("http://") or webapp_url.startswith("https://")):
+        webapp_url = f"https://{webapp_url}"
     bot_token = os.getenv("TELEGRAM_BOT_TOKEN", "")
 
     print_banner(host, port, webapp_url, bot_token)
